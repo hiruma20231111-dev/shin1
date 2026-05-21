@@ -40,9 +40,9 @@ export const IMAGE_PATHS = {
   heroIllustration: "/images/hero-dolphin.png", // TODO: 要確認 - ピンクイルカ/ロゴイラスト（差し替え用）
   shopInterior1: "/images/shop-interior-1.jpg", // TODO: 要確認 - 店内写真1（差し替え用）
   shopInterior2: "/images/shop-interior-2.jpg", // TODO: 要確認 - 店内写真2（差し替え用）
-  staff1: "/images/IMG_7409.HEIC",              // HEIC→JPEG変換が必要（上記コメント参照）
-  staff2: "/images/IMG_7522.HEIC",              // HEIC→JPEG変換が必要（上記コメント参照）
-  staff3: "/images/IMG_7897.JPG",
-  staff4: "/images/IMG_7898.JPG",
+  // スタッフ写真3枚: HEIC→JPEG変換後に実際の写真が表示されます（上記コメント参照）
+  staff1: "/images/IMG_7409.HEIC",  // スタッフソロ写真（HEIC→JPEG変換が必要）
+  staff2: "/images/IMG_7522.HEIC",  // 浴衣イベント写真（HEIC→JPEG変換が必要）
+  staff3: "/images/IMG_7898.JPG",   // ハロウィンイベント写真（JPG・即表示可能）
   shopLogo: "/images/shop-logo.png",            // TODO: 要確認 - ショップロゴ（差し替え用）
 } as const;

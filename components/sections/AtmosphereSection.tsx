@@ -15,12 +15,11 @@ type StaffPhotoItem = {
   imageAlt: string;
 };
 
-// スタッフ写真 - 名前・役職は意図的に非表示
+// スタッフ写真3枚 - 名前・役職は意図的に非表示
 const STAFF_PHOTO_ITEMS: StaffPhotoItem[] = [
-  { imagePath: IMAGE_PATHS.staff1, imageAlt: "PinkDolphinスタッフ写真1" },
-  { imagePath: IMAGE_PATHS.staff2, imageAlt: "PinkDolphinスタッフ写真2" },
-  { imagePath: IMAGE_PATHS.staff3, imageAlt: "PinkDolphinスタッフ写真3" },
-  { imagePath: IMAGE_PATHS.staff4, imageAlt: "PinkDolphinスタッフ写真4" },
+  { imagePath: IMAGE_PATHS.staff1, imageAlt: "PinkDolphinスタッフ写真（バー勤務シーン）" },
+  { imagePath: IMAGE_PATHS.staff2, imageAlt: "PinkDolphinスタッフ写真（浴衣イベント）" },
+  { imagePath: IMAGE_PATHS.staff3, imageAlt: "PinkDolphinスタッフ写真（ハロウィンイベント）" },
 ];
 
 type ShopPhotoItem = {
@@ -177,8 +176,8 @@ export default function AtmosphereSection() {
             個性豊かなメンバーが揃っています。
           </motion.p>
 
-          {/* 2×2フォトグリッド */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* 3枚フォトグリッド: モバイル1列、sm以上で3列 */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {STAFF_PHOTO_ITEMS.map((item) => (
               <motion.div key={item.imagePath} variants={FADE_IN_UP_VARIANTS}>
                 <StaffPhotoCard item={item} />
