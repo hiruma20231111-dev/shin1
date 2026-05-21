@@ -38,8 +38,8 @@ export const JOB_CONDITIONS = {
 export const IMAGE_PATHS = {
   heroBackground: "/images/hero-bg.jpg",        // TODO: 要確認 - ヒーロー背景画像（差し替え用）
   heroIllustration: "/images/hero-dolphin.png", // TODO: 要確認 - ピンクイルカ/ロゴイラスト（差し替え用）
-  shopInterior1: "/images/shop-interior-1.jpg", // TODO: 要確認 - 店内写真1（差し替え用）
-  shopInterior2: "/images/shop-interior-2.jpg", // TODO: 要確認 - 店内写真2（差し替え用）
+  shopInterior1: "/images/shop-darts-corner.jpg", // ダーツコーナー写真 → public/images/shop-darts-corner.jpg に配置
+  shopInterior2: "/images/shop-bar-counter.jpg",  // バーカウンター写真 → public/images/shop-bar-counter.jpg に配置
   // スタッフ写真3枚: HEIC→JPEG変換後に実際の写真が表示されます（上記コメント参照）
   staff1: "/images/IMG_7409.HEIC",  // スタッフソロ写真（HEIC→JPEG変換が必要）
   staff2: "/images/IMG_7522.HEIC",  // 浴衣イベント写真（HEIC→JPEG変換が必要）

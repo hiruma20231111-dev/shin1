@@ -80,6 +80,43 @@ function StaffPhotoCard({ item }: { item: StaffPhotoItem }) {
   );
 }
 
+// 店内写真: ファイル配置後は実際の写真、未配置時はラベル付きプレースホルダーを表示
+function ShopPhotoCard({ photo }: { photo: ShopPhotoItem }) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="relative rounded-2xl overflow-hidden aspect-video border border-darkBorder group">
+      {hasError ? (
+        <div
+          className="w-full h-full flex flex-col items-center justify-center"
+          style={{
+            background: "linear-gradient(135deg, #1a1a2e 0%, #12121a 50%, #1a1a2e 100%)",
+          }}
+          role="img"
+          aria-label={photo.imageAlt}
+        >
+          <span className="text-4xl mb-3" aria-hidden="true">📷</span>
+          <p className="text-textSecondary text-sm">{photo.label}</p>
+          <p className="text-darkBorder text-xs mt-1">{photo.imagePath}</p>
+        </div>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={photo.imagePath}
+          alt={photo.imageAlt}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={() => setHasError(true)}
+        />
+      )}
+      {/* ホバー時ラベルオーバーレイ */}
+      <div className="absolute inset-0 bg-gradient-to-t from-darkBase/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <span className="text-sm font-medium text-white">{photo.label}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function AtmosphereSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, IN_VIEW_OPTIONS);
@@ -120,7 +157,7 @@ export default function AtmosphereSection() {
           </motion.p>
         </motion.div>
 
-        {/* 店内写真（差し替え用プレースホルダー） */}
+        {/* 店内写真: ファイルが配置されれば自動表示、未配置時はプレースホルダー */}
         <motion.div
           variants={STAGGER_CONTAINER_VARIANTS}
           initial="hidden"
@@ -131,27 +168,8 @@ export default function AtmosphereSection() {
             <motion.div
               key={photo.label}
               variants={FADE_IN_UP_VARIANTS}
-              className="relative rounded-2xl overflow-hidden aspect-video border border-darkBorder group"
             >
-              <div
-                className="w-full h-full flex items-center justify-center"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #1a1a2e 0%, #12121a 50%, #1a1a2e 100%)",
-                }}
-                role="img"
-                aria-label={photo.imageAlt}
-              >
-                <div className="text-center">
-                  <div className="text-4xl mb-3" aria-hidden="true">
-                    📷
-                  </div>
-                  <p className="text-textSecondary text-sm">{photo.label}</p>
-                  <p className="text-darkBorder text-xs mt-1">
-                    {photo.imagePath}
-                  </p>
-                </div>
-              </div>
+              <ShopPhotoCard photo={photo} />
             </motion.div>
           ))}
         </motion.div>
