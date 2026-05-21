@@ -7,6 +7,7 @@ import FaqSection from "@/components/sections/FaqSection";
 import AccessSection from "@/components/sections/AccessSection";
 import ApplicationFormSection from "@/components/sections/ApplicationFormSection";
 import CtaBanner from "@/components/CtaBanner";
+import { SHOP_NAME } from "@/constants/shopInfo";
 
 export default function RecruitmentLandingPage() {
   return (
@@ -51,10 +52,7 @@ export default function RecruitmentLandingPage() {
       {/* フッター */}
       <footer className="py-8 px-4 bg-darkSurface border-t border-darkBorder text-center">
         <p className="text-textSecondary text-sm">
-          © 2025 Dart Bar. All rights reserved.
-        </p>
-        <p className="text-darkBorder text-xs mt-2">
-          {/* TODO: 要確認 - 店舗名・著作権表記を確定後に更新すること */}
+          © 2025 {SHOP_NAME}. All rights reserved.
         </p>
       </footer>
     </main>

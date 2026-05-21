@@ -1,4 +1,4 @@
-// AccessSection - アクセス・店舗情報（住所・営業時間・地図プレースホルダー）
+// AccessSection - アクセス・店舗情報（住所・営業時間・Instagram・地図プレースホルダー）
 "use client";
 
 import { useRef } from "react";
@@ -14,28 +14,34 @@ import {
   SHOP_NEAREST_STATION,
   SHOP_BUSINESS_HOURS,
   SHOP_PHONE,
+  SHOP_INSTAGRAM_URL,
+  SHOP_INSTAGRAM_HANDLE,
   GOOGLE_MAPS_EMBED_URL,
 } from "@/constants/shopInfo";
 
-type InfoItem = {
-  icon: string;
-  label: string;
-  value: string;
-};
+type InfoItem =
+  | { kind: "text"; icon: string; label: string; value: string }
+  | { kind: "link"; icon: string; label: string; value: string; href: string };
 
 const INFO_ITEMS: InfoItem[] = [
-  { icon: "🏪", label: "店舗名", value: SHOP_NAME },
-  { icon: "📍", label: "住所", value: SHOP_ADDRESS },
-  { icon: "🚃", label: "最寄り駅", value: SHOP_NEAREST_STATION },
-  { icon: "🌙", label: "営業時間", value: SHOP_BUSINESS_HOURS },
-  { icon: "📞", label: "電話番号", value: SHOP_PHONE },
+  { kind: "text", icon: "🏪", label: "店舗名", value: SHOP_NAME },
+  { kind: "text", icon: "📍", label: "住所", value: SHOP_ADDRESS },
+  { kind: "text", icon: "🚃", label: "最寄り駅", value: SHOP_NEAREST_STATION },
+  { kind: "text", icon: "🌙", label: "営業時間", value: SHOP_BUSINESS_HOURS },
+  { kind: "text", icon: "📞", label: "電話番号", value: SHOP_PHONE },
+  {
+    kind: "link",
+    icon: "📸",
+    label: "Instagram",
+    value: SHOP_INSTAGRAM_HANDLE,
+    href: SHOP_INSTAGRAM_URL,
+  },
 ];
 
 export default function AccessSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, IN_VIEW_OPTIONS);
 
-  // TODO: 要確認 - GOOGLE_MAPS_EMBED_URLが確定したらiframeのsrcに設定すること
   const isMapEmbedUrlReady = !GOOGLE_MAPS_EMBED_URL.startsWith("TODO:");
 
   return (
@@ -100,15 +106,26 @@ export default function AccessSection() {
                     <p className="text-textSecondary text-xs font-medium tracking-wider mb-1">
                       {item.label}
                     </p>
-                    <p className="text-white font-medium text-sm leading-relaxed">
-                      {item.value}
-                    </p>
+                    {item.kind === "link" ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-neonPink font-medium text-sm hover:text-neonPink/80 underline underline-offset-2 transition-colors duration-200"
+                      >
+                        {item.value}
+                      </a>
+                    ) : (
+                      <p className="text-white font-medium text-sm leading-relaxed">
+                        {item.value}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            {/* 補足: スタッフ採用時の勤務時間 */}
+            {/* スタッフ勤務時間補足 */}
             <motion.div
               variants={FADE_IN_UP_VARIANTS}
               className="mt-4 p-4 rounded-xl bg-neonCyan/5 border border-neonCyan/20"
@@ -132,7 +149,6 @@ export default function AccessSection() {
             className="rounded-2xl overflow-hidden border border-darkBorder aspect-video lg:aspect-auto lg:min-h-80"
           >
             {isMapEmbedUrlReady ? (
-              // TODO: 要確認 - Google Maps URL確定後にこのiframeが表示される
               <iframe
                 src={GOOGLE_MAPS_EMBED_URL}
                 width="100%"
@@ -144,11 +160,10 @@ export default function AccessSection() {
                 title="店舗へのアクセスマップ"
               />
             ) : (
-              // マップURL未設定時のプレースホルダー
               <div
                 className="w-full h-full min-h-80 flex flex-col items-center justify-center bg-darkCard"
                 role="img"
-                aria-label="Googleマップ（差し替え用）- 店舗住所確定後に埋め込みURLを設定してください"
+                aria-label="Googleマップ（差し替え用）- 大阪府東大阪市足代新町11-9 リップルⅡ1F"
               >
                 <div className="text-4xl mb-3" aria-hidden="true">
                   🗺️
@@ -156,12 +171,12 @@ export default function AccessSection() {
                 <p className="text-textSecondary text-sm text-center px-4">
                   Googleマップ
                   <br />
-                  （住所確定後に埋め込みURLを設定）
+                  大阪府東大阪市足代新町11-9
                 </p>
                 <p className="text-darkBorder text-xs mt-2 text-center px-4">
                   constants/shopInfo.ts の
                   <br />
-                  GOOGLE_MAPS_EMBED_URL を更新
+                  GOOGLE_MAPS_EMBED_URL を更新してください
                 </p>
               </div>
             )}

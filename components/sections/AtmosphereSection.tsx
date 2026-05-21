@@ -1,7 +1,7 @@
-// AtmosphereSection - 職場の雰囲気・スタッフ紹介（写真プレースホルダー付き）
+// AtmosphereSection - 職場の雰囲気・スタッフ写真（名前非表示）・イベント紹介
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   FADE_IN_UP_VARIANTS,
@@ -10,43 +10,17 @@ import {
 } from "@/constants/animations";
 import { IMAGE_PATHS } from "@/constants/shopInfo";
 
-type StaffMember = {
+type StaffPhotoItem = {
   imagePath: string;
   imageAlt: string;
-  name: string;
-  role: string;
-  comment: string;
-  emoji: string;
 };
 
-const STAFF_MEMBERS: StaffMember[] = [
-  {
-    imagePath: IMAGE_PATHS.staff1,
-    imageAlt: "スタッフ写真（差し替え用）- スタッフAの顔写真またはポートレート",
-    name: "スタッフA",
-    role: "大学3年生",
-    comment:
-      "最初はバーテンダーなんて全然できなかったけど、今では常連さんに顔を覚えてもらえるようになりました！夜が好きなら絶対楽しいです。",
-    emoji: "🎯",
-  },
-  {
-    imagePath: IMAGE_PATHS.staff2,
-    imageAlt: "スタッフ写真（差し替え用）- スタッフBの顔写真またはポートレート",
-    name: "スタッフB",
-    role: "大学2年生",
-    comment:
-      "週2で入ってて、授業との両立もしやすい。ダーツめちゃくちゃ上手くなったし、友達もいっぱい増えました！",
-    emoji: "🍹",
-  },
-  {
-    imagePath: IMAGE_PATHS.staff3,
-    imageAlt: "スタッフ写真（差し替え用）- スタッフCの顔写真またはポートレート",
-    name: "スタッフC",
-    role: "専門学生",
-    comment:
-      "他のバイトと掛け持ちしてます。夜の仕事は初めてで不安でしたが、先輩スタッフが丁寧に教えてくれてすぐ慣れました！",
-    emoji: "🎤",
-  },
+// スタッフ写真 - 名前・役職は意図的に非表示
+const STAFF_PHOTO_ITEMS: StaffPhotoItem[] = [
+  { imagePath: IMAGE_PATHS.staff1, imageAlt: "PinkDolphinスタッフ写真1" },
+  { imagePath: IMAGE_PATHS.staff2, imageAlt: "PinkDolphinスタッフ写真2" },
+  { imagePath: IMAGE_PATHS.staff3, imageAlt: "PinkDolphinスタッフ写真3" },
+  { imagePath: IMAGE_PATHS.staff4, imageAlt: "PinkDolphinスタッフ写真4" },
 ];
 
 type ShopPhotoItem = {
@@ -67,6 +41,45 @@ const SHOP_PHOTOS: ShopPhotoItem[] = [
     label: "バーカウンター",
   },
 ];
+
+// 画像読み込みエラー時にプレースホルダーへフォールバックするコンポーネント
+// HEIC形式はブラウザ非対応のためフォールバックが表示される（JPEG変換後に解消）
+function StaffPhotoCard({ item }: { item: StaffPhotoItem }) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="relative aspect-square rounded-2xl overflow-hidden border border-darkBorder group">
+      {hasError ? (
+        <div
+          className="w-full h-full flex flex-col items-center justify-center"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255,45,120,0.1), rgba(155,93,229,0.1))",
+          }}
+          role="img"
+          aria-label={item.imageAlt}
+        >
+          <span className="text-4xl mb-2" aria-hidden="true">
+            📷
+          </span>
+          <p className="text-textSecondary text-xs text-center px-3">
+            {item.imageAlt}
+          </p>
+        </div>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.imagePath}
+          alt={item.imageAlt}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={() => setHasError(true)}
+        />
+      )}
+      {/* ホバー時グラデーションオーバーレイ */}
+      <div className="absolute inset-0 bg-gradient-to-t from-neonPink/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    </div>
+  );
+}
 
 export default function AtmosphereSection() {
   const ref = useRef<HTMLElement>(null);
@@ -108,7 +121,7 @@ export default function AtmosphereSection() {
           </motion.p>
         </motion.div>
 
-        {/* 店内写真プレースホルダー */}
+        {/* 店内写真（差し替え用プレースホルダー） */}
         <motion.div
           variants={STAGGER_CONTAINER_VARIANTS}
           initial="hidden"
@@ -121,13 +134,11 @@ export default function AtmosphereSection() {
               variants={FADE_IN_UP_VARIANTS}
               className="relative rounded-2xl overflow-hidden aspect-video border border-darkBorder group"
             >
-              {/* 画像プレースホルダー: 実素材を public/images/ に配置後、img/Imageタグに差し替え */}
               <div
                 className="w-full h-full flex items-center justify-center"
                 style={{
                   background:
                     "linear-gradient(135deg, #1a1a2e 0%, #12121a 50%, #1a1a2e 100%)",
-                  backgroundSize: "400% 400%",
                 }}
                 role="img"
                 aria-label={photo.imageAlt}
@@ -142,61 +153,81 @@ export default function AtmosphereSection() {
                   </p>
                 </div>
               </div>
-              {/* グラデーションオーバーレイ */}
-              <div className="absolute inset-0 bg-gradient-to-t from-darkBase/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <span className="text-sm text-textSecondary">{photo.label}</span>
-              </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* スタッフ紹介カード */}
+        {/* スタッフ写真セクション */}
         <motion.div
           variants={STAGGER_CONTAINER_VARIANTS}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
-          className="mb-10"
+          className="mb-12"
         >
           <motion.h3
             variants={FADE_IN_UP_VARIANTS}
-            className="text-2xl font-black text-white text-center mb-10"
+            className="text-2xl font-black text-white text-center mb-3"
           >
-            スタッフの声
+            スタッフ紹介
           </motion.h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {STAFF_MEMBERS.map((member) => (
-              <motion.div
-                key={member.name}
-                variants={FADE_IN_UP_VARIANTS}
-                className="rounded-2xl border border-darkBorder bg-darkCard p-6"
-              >
-                {/* スタッフ写真プレースホルダー */}
-                <div
-                  className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-neonPurple/40"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(155,93,229,0.2), rgba(255,45,120,0.1))",
-                  }}
-                  role="img"
-                  aria-label={member.imageAlt}
-                >
-                  <span className="text-3xl" aria-hidden="true">
-                    {member.emoji}
-                  </span>
-                  {/* 画像差し替え用パス: {member.imagePath} */}
-                </div>
-                <div className="text-center mb-4">
-                  <p className="font-bold text-white">{member.name}</p>
-                  <p className="text-textSecondary text-xs mt-1">
-                    {member.role}
-                  </p>
-                </div>
-                <p className="text-textSecondary text-sm leading-relaxed text-center">
-                  &ldquo;{member.comment}&rdquo;
-                </p>
+          <motion.p
+            variants={FADE_IN_UP_VARIANTS}
+            className="text-textSecondary text-center mb-10"
+          >
+            個性豊かなメンバーが揃っています。
+          </motion.p>
+
+          {/* 2×2フォトグリッド */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {STAFF_PHOTO_ITEMS.map((item) => (
+              <motion.div key={item.imagePath} variants={FADE_IN_UP_VARIANTS}>
+                <StaffPhotoCard item={item} />
               </motion.div>
             ))}
+          </div>
+        </motion.div>
+
+        {/* "愉快なスタッフたちと一緒に働きましょう" タグライン */}
+        <motion.div
+          variants={FADE_IN_UP_VARIANTS}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          className="mb-8"
+        >
+          <div className="rounded-3xl border border-neonPink/30 bg-gradient-to-br from-neonPink/10 via-neonPurple/5 to-darkCard p-8 text-center">
+            <p className="text-3xl md:text-4xl font-black text-white mb-3">
+              愉快なスタッフたちと
+              <br className="md:hidden" />
+              一緒に働きましょう 🐬
+            </p>
+            <p className="text-textSecondary text-lg">
+              笑いあり、ダーツあり、夜ならではの盛り上がりあり。
+              <br />
+              PinkDolphinは、あなたを待っています。
+            </p>
+          </div>
+        </motion.div>
+
+        {/* イベント開催について */}
+        <motion.div
+          variants={FADE_IN_UP_VARIANTS}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          className="mb-10"
+        >
+          <div className="rounded-2xl border border-neonCyan/20 bg-neonCyan/5 p-6 flex flex-col md:flex-row items-center gap-6">
+            <div className="text-5xl flex-shrink-0" aria-hidden="true">
+              🎉
+            </div>
+            <div>
+              <h4 className="text-neonCyan font-black text-xl mb-2">
+                イベントも定期開催！
+              </h4>
+              <p className="text-textSecondary leading-relaxed">
+                ダーツトーナメントや季節のイベントなど、お客様と一緒に盛り上がる企画を定期的に行っています。
+                スタッフとして運営に携わることで、接客だけでは得られない達成感と楽しさを体験できます。
+              </p>
+            </div>
           </div>
         </motion.div>
 
@@ -212,9 +243,9 @@ export default function AtmosphereSection() {
               "🏖️ リラックス感",
               "🌴 トロピカルな雰囲気",
               "🎯 ダーツで盛り上がる",
-              "🤝 チームワーク抜群",
+              "🎉 定期イベント開催",
               "🌊 海モチーフのデコ",
-              "🐬 個性的なスタッフ",
+              "🐬 愉快なスタッフ",
               "🎶 音楽が流れる夜",
             ].map((tag) => (
               <span

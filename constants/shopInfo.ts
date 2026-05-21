@@ -1,16 +1,18 @@
-// 店舗固有情報定数 - 確定次第各TODO箇所を更新すること
+// 店舗固有情報定数
 
-// TODO: 要確認 - 以下の定数はすべてオーナーへの確認後に実際の値へ置き換えること
+export const SHOP_NAME = "darts&shot Bar PinkDolphin";
 
-export const SHOP_NAME = "TODO: 要確認 - 店舗名（例: Dart Bar TROPICANA）";
+export const SHOP_ADDRESS = "大阪府東大阪市足代新町11-9 リップルⅡ1F";
 
-export const SHOP_ADDRESS = "TODO: 要確認 - 正式住所（例: 東京都渋谷区〇〇町1-2-3 ××ビル2F）";
-
-export const SHOP_NEAREST_STATION = "TODO: 要確認 - 最寄り駅・徒歩分数（例: 渋谷駅 徒歩3分）";
+export const SHOP_NEAREST_STATION = "近鉄布施駅 徒歩10分";
 
 export const SHOP_BUSINESS_HOURS = "TODO: 要確認 - 営業時間（例: 19:00〜翌6:00）";
 
-export const SHOP_PHONE = "TODO: 要確認 - 電話番号";
+export const SHOP_PHONE = "06-6224-7773";
+
+export const SHOP_INSTAGRAM_URL = "https://www.instagram.com/fuse.bar.pindol/";
+
+export const SHOP_INSTAGRAM_HANDLE = "@fuse.bar.pindol";
 
 // Google Maps埋め込みURL: Google Maps > 共有 > 地図を埋め込む からiframeのsrc値を取得
 export const GOOGLE_MAPS_EMBED_URL = "TODO: 要確認 - Google Maps埋め込みURL（例: https://www.google.com/maps/embed?pb=...）";
@@ -29,14 +31,18 @@ export const JOB_CONDITIONS = {
   dresscode: "服装・髪型 自由",
 } as const;
 
-// 画像パス定数 - public/images/ 配下に実素材を配置後、パスを差し替えること
+// 画像パス定数 - public/images/ 配下にファイルを配置して使用
+// IMPORTANT: HEIC形式（IMG_7409.HEIC, IMG_7522.HEIC）はブラウザ非対応のため、
+// macOSプレビュー.app・Squoosh（https://squoosh.app）等でJPEGまたはWebPに変換後、
+// 同じファイル名のまま拡張子のみ変更してください。変換前は代替プレースホルダーが表示されます。
 export const IMAGE_PATHS = {
   heroBackground: "/images/hero-bg.jpg",        // TODO: 要確認 - ヒーロー背景画像（差し替え用）
   heroIllustration: "/images/hero-dolphin.png", // TODO: 要確認 - ピンクイルカ/ロゴイラスト（差し替え用）
   shopInterior1: "/images/shop-interior-1.jpg", // TODO: 要確認 - 店内写真1（差し替え用）
   shopInterior2: "/images/shop-interior-2.jpg", // TODO: 要確認 - 店内写真2（差し替え用）
-  staff1: "/images/staff-1.jpg",                // TODO: 要確認 - スタッフ写真1（差し替え用）
-  staff2: "/images/staff-2.jpg",                // TODO: 要確認 - スタッフ写真2（差し替え用）
-  staff3: "/images/staff-3.jpg",                // TODO: 要確認 - スタッフ写真3（差し替え用）
+  staff1: "/images/IMG_7409.HEIC",              // HEIC→JPEG変換が必要（上記コメント参照）
+  staff2: "/images/IMG_7522.HEIC",              // HEIC→JPEG変換が必要（上記コメント参照）
+  staff3: "/images/IMG_7897.JPG",
+  staff4: "/images/IMG_7898.JPG",
   shopLogo: "/images/shop-logo.png",            // TODO: 要確認 - ショップロゴ（差し替え用）
 } as const;
