@@ -14,9 +14,8 @@ export const SHOP_INSTAGRAM_URL = "https://www.instagram.com/fuse.bar.pindol/";
 
 export const SHOP_INSTAGRAM_HANDLE = "@fuse.bar.pindol";
 
-// Google Maps埋め込みURL（APIキー不要の住所検索形式）
-// 元のシェアURL: https://maps.app.goo.gl/k2QVPpCH8SVANn3f6
-export const GOOGLE_MAPS_EMBED_URL = "https://maps.google.com/maps?q=%E5%A4%A7%E9%98%AA%E5%BA%9C%E6%9D%B1%E5%A4%A7%E9%98%AA%E5%B8%82%E8%B6%B3%E4%BB%A3%E6%96%B0%E7%94%BA11-9%20%E3%83%AA%E3%83%83%E3%83%97%E3%83%ABII1F&output=embed&hl=ja&z=17";
+// Google Maps埋め込みURL（Google Maps「地図を埋め込む」から取得した正式URL）
+export const GOOGLE_MAPS_EMBED_URL = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.5738633914184!2d135.55719407574293!3d34.66546337293221!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6000de32420ad0ab%3A0x80c2399e59af2d3!2z44OU44Oz44Kv44OJ44Or44OV44Kj44Oz!5e0!3m2!1sja!2sjp!4v1779377618203!5m2!1sja!2sjp";
 
 // Formspreeフォームエンドポイント: https://formspree.io/f/xbdbognr
 // 送信先: shin.crml.c@icloud.com
@@ -32,18 +31,15 @@ export const JOB_CONDITIONS = {
   dresscode: "服装・髪型 自由",
 } as const;
 
-// 画像パス定数 - public/images/ 配下にファイルを配置して使用
-// IMPORTANT: HEIC形式（IMG_7409.HEIC, IMG_7522.HEIC）はブラウザ非対応のため、
-// macOSプレビュー.app・Squoosh（https://squoosh.app）等でJPEGまたはWebPに変換後、
-// 同じファイル名のまま拡張子のみ変更してください。変換前は代替プレースホルダーが表示されます。
+// 画像パス定数 - public/images/ 配下のファイルを参照
 export const IMAGE_PATHS = {
-  heroBackground: "/images/hero-bg.jpg",        // TODO: 要確認 - ヒーロー背景画像（差し替え用）
-  heroIllustration: "/images/hero-dolphin.png", // TODO: 要確認 - ピンクイルカ/ロゴイラスト（差し替え用）
-  shopInterior1: "/images/shop-darts-corner.jpg", // ダーツコーナー写真 → public/images/shop-darts-corner.jpg に配置
-  shopInterior2: "/images/shop-bar-counter.jpg",  // バーカウンター写真 → public/images/shop-bar-counter.jpg に配置
-  // スタッフ写真3枚: HEIC→JPEG変換後に実際の写真が表示されます（上記コメント参照）
-  staff1: "/images/IMG_7409.HEIC",  // スタッフソロ写真（HEIC→JPEG変換が必要）
-  staff2: "/images/IMG_7522.HEIC",  // 浴衣イベント写真（HEIC→JPEG変換が必要）
-  staff3: "/images/IMG_7898.JPG",   // ハロウィンイベント写真（JPG・即表示可能）
-  shopLogo: "/images/shop-logo.png",            // TODO: 要確認 - ショップロゴ（差し替え用）
+  heroBackground: "/images/hero-bg.jpg",           // TODO: 要確認 - ヒーロー背景画像（差し替え用）
+  heroIllustration: "/images/hero-dolphin.png",    // TODO: 要確認 - ピンクイルカ/ロゴイラスト（差し替え用）
+  shopInterior1: "/images/shop-darts-corner.jpg",  // ダーツコーナー写真 → public/images/shop-darts-corner.jpg に配置
+  shopInterior2: "/images/shop-bar-counter.jpg",   // バーカウンター写真 → public/images/shop-bar-counter.jpg に配置
+  // スタッフ写真3枚: HEICをJPEGに変換済み（1200px・85%品質）
+  staff1: "/images/IMG_7409.jpg",   // スタッフソロ写真
+  staff2: "/images/IMG_7522.jpg",   // 浴衣イベント写真
+  staff3: "/images/IMG_7898.jpg",   // ハロウィンイベント写真
+  shopLogo: "/images/shop-logo.png",               // TODO: 要確認 - ショップロゴ（差し替え用）
 } as const;
