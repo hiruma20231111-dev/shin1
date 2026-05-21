@@ -14,8 +14,9 @@ export const SHOP_INSTAGRAM_URL = "https://www.instagram.com/fuse.bar.pindol/";
 
 export const SHOP_INSTAGRAM_HANDLE = "@fuse.bar.pindol";
 
-// Google Maps埋め込みURL: Google Maps > 共有 > 地図を埋め込む からiframeのsrc値を取得
-export const GOOGLE_MAPS_EMBED_URL = "TODO: 要確認 - Google Maps埋め込みURL（例: https://www.google.com/maps/embed?pb=...）";
+// Google Maps埋め込みURL（APIキー不要の住所検索形式）
+// 元のシェアURL: https://maps.app.goo.gl/k2QVPpCH8SVANn3f6
+export const GOOGLE_MAPS_EMBED_URL = "https://maps.google.com/maps?q=%E5%A4%A7%E9%98%AA%E5%BA%9C%E6%9D%B1%E5%A4%A7%E9%98%AA%E5%B8%82%E8%B6%B3%E4%BB%A3%E6%96%B0%E7%94%BA11-9%20%E3%83%AA%E3%83%83%E3%83%97%E3%83%ABII1F&output=embed&hl=ja&z=17";
 
 // Formspreeフォームエンドポイント: https://formspree.io/f/xbdbognr
 // 送信先: shin.crml.c@icloud.com
