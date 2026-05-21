@@ -15,9 +15,9 @@ export const SHOP_PHONE = "TODO: 要確認 - 電話番号";
 // Google Maps埋め込みURL: Google Maps > 共有 > 地図を埋め込む からiframeのsrc値を取得
 export const GOOGLE_MAPS_EMBED_URL = "TODO: 要確認 - Google Maps埋め込みURL（例: https://www.google.com/maps/embed?pb=...）";
 
-// FormspreeフォームID: https://formspree.io でフォームを作成し、送信先をshin.crml.c@icloud.comに設定後、
-// フォームID（例: xpwzabcd）をここに記載する
-export const FORMSPREE_FORM_ID = "TODO: 要確認 - FormspreeフォームID（formspree.ioでフォーム作成後に取得）";
+// Formspreeフォームエンドポイント: https://formspree.io/f/xbdbognr
+// 送信先: shin.crml.c@icloud.com
+export const FORMSPREE_FORM_ID = "xbdbognr";
 
 // 採用条件 - ヒアリング済み確定値
 export const JOB_CONDITIONS = {

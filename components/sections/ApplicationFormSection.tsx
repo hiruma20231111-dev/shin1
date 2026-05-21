@@ -1,8 +1,9 @@
-// ApplicationFormSection - 応募フォーム（Formspree送信・成功/失敗UI実装）
+// ApplicationFormSection - 応募フォーム（@formspree/react useFormフック使用）
 "use client";
 
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { useForm, ValidationError } from "@formspree/react";
 import {
   FADE_IN_UP_VARIANTS,
   STAGGER_CONTAINER_VARIANTS,
@@ -11,67 +12,94 @@ import {
 } from "@/constants/animations";
 import { FORMSPREE_FORM_ID } from "@/constants/shopInfo";
 
-// Formspree送信エンドポイント
-const FORMSPREE_ENDPOINT = `https://formspree.io/f/${FORMSPREE_FORM_ID}`;
+// クライアントサイドバリデーション用のローカル状態型
+// @formspree/react のサーバーサイドエラーと分離して管理する
+type ClientFieldErrors = {
+  name?: string;
+  phone?: string;
+  email?: string;
+};
 
-type FormField = "applicantName" | "phoneNumber" | "emailAddress" | "message";
+type LocalFormValues = {
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+};
 
-type FormValues = Record<FormField, string>;
-
-type FieldErrors = Partial<Record<FormField, string>>;
-
-type SubmitStatus = "idle" | "submitting" | "success" | "error";
-
-const INITIAL_FORM_VALUES: FormValues = {
-  applicantName: "",
-  phoneNumber: "",
-  emailAddress: "",
+const INITIAL_FORM_VALUES: LocalFormValues = {
+  name: "",
+  phone: "",
+  email: "",
   message: "",
 };
 
-function validateFormValues(values: FormValues): FieldErrors {
-  const errors: FieldErrors = {};
+function validateLocalFormValues(values: LocalFormValues): ClientFieldErrors {
+  const errors: ClientFieldErrors = {};
 
-  if (!values.applicantName.trim()) {
-    errors.applicantName = "お名前を入力してください";
+  if (!values.name.trim()) {
+    errors.name = "お名前を入力してください";
   }
 
-  if (!values.phoneNumber.trim()) {
-    errors.phoneNumber = "電話番号を入力してください";
-  } else if (!/^[\d\-+() ]{7,15}$/.test(values.phoneNumber.trim())) {
-    errors.phoneNumber = "正しい電話番号の形式で入力してください";
+  if (!values.phone.trim()) {
+    errors.phone = "電話番号を入力してください";
+  } else if (!/^[\d\-+() ]{7,15}$/.test(values.phone.trim())) {
+    errors.phone = "正しい電話番号の形式で入力してください";
   }
 
-  if (!values.emailAddress.trim()) {
-    errors.emailAddress = "メールアドレスを入力してください";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.emailAddress.trim())) {
-    errors.emailAddress = "正しいメールアドレスの形式で入力してください";
+  if (!values.email.trim()) {
+    errors.email = "メールアドレスを入力してください";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+    errors.email = "正しいメールアドレスの形式で入力してください";
   }
 
   return errors;
 }
 
+// ValidationErrorのスタイルをブランドデザインに合わせるためのラッパー
+// @formspree/react の ValidationError はデフォルトでフィールドレベルのサーバーエラーを表示する
+function FormspreeFieldError({
+  field,
+  errors,
+}: {
+  field: string;
+  errors: Parameters<typeof ValidationError>[0]["errors"];
+}) {
+  return (
+    <ValidationError
+      field={field}
+      errors={errors}
+      className="mt-1.5 text-red-400 text-xs flex items-center gap-1"
+    />
+  );
+}
+
 type InputFieldProps = {
   id: string;
+  name: string;
   label: string;
   type?: "text" | "email" | "tel";
   value: string;
   onChange: (value: string) => void;
-  error?: string;
+  clientError?: string;
+  formspreeErrors: Parameters<typeof ValidationError>[0]["errors"];
   required?: boolean;
   placeholder?: string;
 };
 
 function InputField({
   id,
+  name,
   label,
   type = "text",
   value,
   onChange,
-  error,
+  clientError,
+  formspreeErrors,
   required = false,
   placeholder,
 }: InputFieldProps) {
+  const hasError = !!clientError;
   return (
     <div>
       <label
@@ -87,31 +115,33 @@ function InputField({
       </label>
       <input
         id={id}
-        name={id}
+        name={name}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-required={required}
-        aria-invalid={!!error}
-        aria-describedby={error ? `${id}-error` : undefined}
+        aria-invalid={hasError}
+        aria-describedby={clientError ? `${id}-error` : undefined}
         className={`w-full px-4 py-3 rounded-xl bg-darkBase border transition-colors duration-200 text-white placeholder-textSecondary/50 focus:outline-none focus:ring-2 ${
-          error
+          hasError
             ? "border-red-500/60 focus:ring-red-500/40 focus:border-red-500"
             : "border-darkBorder focus:ring-neonCyan/40 focus:border-neonCyan/60"
         }`}
       />
-      {/* 送信失敗時: フォームを維持したままエラーメッセージをフィールド直下に表示 */}
-      {error && (
+      {/* クライアントサイドエラー: 送信前バリデーション */}
+      {clientError && (
         <p
           id={`${id}-error`}
           role="alert"
           className="mt-1.5 text-red-400 text-xs flex items-center gap-1"
         >
           <span aria-hidden="true">⚠</span>
-          {error}
+          {clientError}
         </p>
       )}
+      {/* サーバーサイドエラー: @formspree/react が返す検証エラー */}
+      <FormspreeFieldError field={name} errors={formspreeErrors} />
     </div>
   );
 }
@@ -120,67 +150,37 @@ export default function ApplicationFormSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, IN_VIEW_OPTIONS);
 
-  const [formValues, setFormValues] = useState<FormValues>(INITIAL_FORM_VALUES);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
-  const [serverErrorMessage, setServerErrorMessage] = useState("");
+  // @formspree/react: state.succeeded / state.submitting / state.errors を提供
+  const [formspreeState, submitToFormspree] = useForm(FORMSPREE_FORM_ID);
 
-  const updateField = (field: FormField) => (value: string) => {
-    setFormValues((prev) => ({ ...prev, [field]: value }));
-    // フィールド編集時にそのフィールドのエラーをクリア
-    if (fieldErrors[field]) {
-      setFieldErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
+  const [formValues, setFormValues] = useState<LocalFormValues>(INITIAL_FORM_VALUES);
+  const [clientErrors, setClientErrors] = useState<ClientFieldErrors>({});
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const updateField =
+    (field: keyof LocalFormValues) => (value: string) => {
+      setFormValues((prev) => ({ ...prev, [field]: value }));
+      // 入力時にそのフィールドのクライアントエラーをクリア
+      if (clientErrors[field as keyof ClientFieldErrors]) {
+        setClientErrors((prev) => {
+          const next = { ...prev };
+          delete next[field as keyof ClientFieldErrors];
+          return next;
+        });
+      }
+    };
+
+  // クライアントバリデーションを通過した場合のみ useForm の送信ハンドラを呼ぶ
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const errors = validateFormValues(formValues);
+    const errors = validateLocalFormValues(formValues);
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
+      setClientErrors(errors);
       return;
     }
 
-    setSubmitStatus("submitting");
-    setServerErrorMessage("");
-
-    try {
-      const response = await fetch(FORMSPREE_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          お名前: formValues.applicantName,
-          電話番号: formValues.phoneNumber,
-          メールアドレス: formValues.emailAddress,
-          メッセージ: formValues.message || "（なし）",
-        }),
-      });
-
-      if (response.ok) {
-        // 送信成功: フォームを非表示にして日本語の完了メッセージを表示
-        setSubmitStatus("success");
-      } else {
-        const data = await response.json().catch(() => ({}));
-        const errorText =
-          (data as { error?: string }).error ??
-          "送信に失敗しました。しばらく経ってから再度お試しください。";
-        setServerErrorMessage(errorText);
-        setSubmitStatus("error");
-      }
-    } catch {
-      setServerErrorMessage(
-        "通信エラーが発生しました。インターネット接続を確認の上、再度お試しください。"
-      );
-      setSubmitStatus("error");
-    }
+    // @formspree/react に処理を委譲: HTMLフォームの name 属性でフィールドを送信
+    submitToFormspree(e);
   };
 
   return (
@@ -237,8 +237,8 @@ export default function ApplicationFormSection() {
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
         >
-          {/* 送信成功: フォームを非表示にして完了メッセージを表示 */}
-          {submitStatus === "success" ? (
+          {/* 送信成功: state.succeeded が true になったらフォームを非表示にして完了メッセージを表示 */}
+          {formspreeState.succeeded ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -265,42 +265,49 @@ export default function ApplicationFormSection() {
               </p>
             </motion.div>
           ) : (
-            // 送信前・送信失敗時: フォームを表示
+            // 送信前・送信失敗時: フォームを表示したまま維持
             <motion.form
               animate={NEON_GLOW_ANIMATE.pink}
-              onSubmit={handleSubmit}
+              onSubmit={handleFormSubmit}
               noValidate
               className="rounded-3xl border border-neonPink/30 bg-darkCard p-8 md:p-10 space-y-6"
               aria-label="採用応募フォーム"
             >
               <InputField
                 id="applicantName"
+                name="name"
                 label="お名前"
-                value={formValues.applicantName}
-                onChange={updateField("applicantName")}
-                error={fieldErrors.applicantName}
+                value={formValues.name}
+                onChange={updateField("name")}
+                clientError={clientErrors.name}
+                formspreeErrors={formspreeState.errors}
                 required
                 placeholder="山田 太郎"
               />
 
               <InputField
                 id="phoneNumber"
+                name="phone"
                 label="電話番号"
                 type="tel"
-                value={formValues.phoneNumber}
-                onChange={updateField("phoneNumber")}
-                error={fieldErrors.phoneNumber}
+                value={formValues.phone}
+                onChange={updateField("phone")}
+                clientError={clientErrors.phone}
+                formspreeErrors={formspreeState.errors}
                 required
                 placeholder="090-1234-5678"
               />
 
+              {/* email フィールド: Formspree が自動的にreply-toとして認識する name="email" を使用 */}
               <InputField
                 id="emailAddress"
+                name="email"
                 label="メールアドレス"
                 type="email"
-                value={formValues.emailAddress}
-                onChange={updateField("emailAddress")}
-                error={fieldErrors.emailAddress}
+                value={formValues.email}
+                onChange={updateField("email")}
+                clientError={clientErrors.email}
+                formspreeErrors={formspreeState.errors}
                 required
                 placeholder="example@email.com"
               />
@@ -325,35 +332,22 @@ export default function ApplicationFormSection() {
                   placeholder="週2〜3日希望です。ダーツ未経験ですが興味があります。"
                   className="w-full px-4 py-3 rounded-xl bg-darkBase border border-darkBorder text-white placeholder-textSecondary/50 focus:outline-none focus:ring-2 focus:ring-neonCyan/40 focus:border-neonCyan/60 transition-colors duration-200 resize-none"
                 />
+                <FormspreeFieldError
+                  field="message"
+                  errors={formspreeState.errors}
+                />
               </div>
 
-              {/* サーバーエラーメッセージ - 送信失敗時にフォーム直下に表示 */}
-              {submitStatus === "error" && serverErrorMessage && (
-                <div
-                  role="alert"
-                  className="p-4 rounded-xl bg-red-500/10 border border-red-500/40 text-red-400 text-sm flex items-start gap-2"
-                >
-                  <span aria-hidden="true" className="flex-shrink-0 mt-0.5">
-                    ⚠
-                  </span>
-                  <p>{serverErrorMessage}</p>
-                </div>
-              )}
-
-              {/* TODO: 要確認 - FORMSPREE_FORM_IDが未設定の場合の警告表示（本番環境では削除） */}
-              {FORMSPREE_FORM_ID.startsWith("TODO:") && (
-                <div
-                  role="note"
-                  className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/40 text-yellow-400 text-sm"
-                >
-                  ⚠ 開発環境: formspree.ioでフォームを作成し、
-                  constants/shopInfo.ts の FORMSPREE_FORM_ID を設定してください
-                </div>
-              )}
+              {/* フォームレベルのサーバーエラー（フィールド非紐付きエラー）
+                  送信失敗時: フォームを維持したまま赤系エラーメッセージをフォーム直下に表示 */}
+              <ValidationError
+                errors={formspreeState.errors}
+                className="p-4 rounded-xl bg-red-500/10 border border-red-500/40 text-red-400 text-sm"
+              />
 
               <button
                 type="submit"
-                disabled={submitStatus === "submitting"}
+                disabled={formspreeState.submitting}
                 className="w-full py-4 rounded-xl text-white font-black text-lg relative overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed transition-opacity duration-200"
                 style={{
                   background:
@@ -362,7 +356,7 @@ export default function ApplicationFormSection() {
                     "0 0 20px rgba(255, 45, 120, 0.4), 0 0 40px rgba(255, 45, 120, 0.2)",
                 }}
               >
-                {submitStatus === "submitting" ? (
+                {formspreeState.submitting ? (
                   <span className="flex items-center justify-center gap-2">
                     <motion.span
                       animate={{ rotate: 360 }}
